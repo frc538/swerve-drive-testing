@@ -23,18 +23,24 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Add your docs here.
  */
 public class SwerveModule {
-  private final double STEERING_RATIO = 18;
-  private final double RADIANS_PER_ROTATION = 2 * Math.PI;
-  private final double SECONDS_PER_MINUTE = 60;
-  private final double RADIUS_METERS = 2 * 2.54 / 100;
-  private final double STAGE_ONE_DRIVER = 42;
-  private final double STAGE_ONE_DRIVEN = 14;
-  private final double STAGE_TWO_DRIVER = 18;
-  private final double STAGE_TWO_DRIVEN = 26;
-  private final double STAGE_THREE_DRIVER = 60;
-  private final double STAGE_THREE_DRIVEN = 15;
-  private final double DRIVING_RATIO = (STAGE_ONE_DRIVER / STAGE_ONE_DRIVEN) * (STAGE_TWO_DRIVER / STAGE_TWO_DRIVEN)
-      * (STAGE_THREE_DRIVER / STAGE_THREE_DRIVEN);
+  private static final double STEERING_RATIO = 18;
+  private static final double RADIANS_PER_ROTATION = 2 * Math.PI;
+  private static final double SECONDS_PER_MINUTE = 60;
+  private static final double RADIUS_METERS = 2 * 2.54 / 100;
+  private static final double STAGE_ONE_DRIVER = 42;
+  private static final double STAGE_ONE_DRIVEN = 14;
+  private static final double STAGE_TWO_DRIVER = 18;
+  private static final double STAGE_TWO_DRIVEN = 26;
+  private static final double STAGE_THREE_DRIVER = 60;
+  private static final double STAGE_THREE_DRIVEN = 15;
+  private static final double DRIVING_RATIO = (STAGE_ONE_DRIVER / STAGE_ONE_DRIVEN)
+      * (STAGE_TWO_DRIVER / STAGE_TWO_DRIVEN) * (STAGE_THREE_DRIVER / STAGE_THREE_DRIVEN);
+  private static final double DRIVE_VELOCITY_CONVERSION_FACTOR = RADIANS_PER_ROTATION / SECONDS_PER_MINUTE
+      * RADIUS_METERS / DRIVING_RATIO;
+  private static final double MAX_RPM = 5664;
+  private static final double STEER_POSITION_CONVERSION_FACTOR = RADIANS_PER_ROTATION / STEERING_RATIO;
+
+  public static double MAX_SPEED_METERS_PER_SECOND = MAX_RPM * DRIVE_VELOCITY_CONVERSION_FACTOR;
 
   private final CANSparkMax drive;
   private final CANSparkMax turn;
@@ -60,8 +66,8 @@ public class SwerveModule {
     driveEncoder = drive.getEncoder();
     turnEncoder = turn.getEncoder();
 
-    driveEncoder.setVelocityConversionFactor(RADIANS_PER_ROTATION / SECONDS_PER_MINUTE * RADIUS_METERS / DRIVING_RATIO);
-    turnEncoder.setPositionConversionFactor(RADIANS_PER_ROTATION / STEERING_RATIO);
+    driveEncoder.setVelocityConversionFactor(DRIVE_VELOCITY_CONVERSION_FACTOR);
+    turnEncoder.setPositionConversionFactor(STEER_POSITION_CONVERSION_FACTOR);
 
     absEncoder = new AnalogEncoder(new AnalogInput(absEncId));
     absEncoder.setDistancePerRotation(RADIANS_PER_ROTATION);
@@ -100,6 +106,7 @@ public class SwerveModule {
     turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
   }
 
+  @SuppressWarnings("unused")
   private void setStateOptimized(SwerveModuleState state) {
     double angleRadians = state.angle.getRadians();
     double speedMs = state.speedMetersPerSecond;
