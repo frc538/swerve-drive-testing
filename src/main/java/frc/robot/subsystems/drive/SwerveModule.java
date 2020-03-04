@@ -97,17 +97,19 @@ public class SwerveModule {
     return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(turnEncoder.getPosition()));
   }
 
-  public void setState(SwerveModuleState state) {
-    setStateDefault(state);
+  public void setState(SwerveModuleState state, boolean testing) {
+    setStateDefault(state, testing);
   }
 
-  private void setStateDefault(SwerveModuleState state) {
-    driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
+  private void setStateDefault(SwerveModuleState state, boolean testing) {
+    if (!testing) {
+      driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
+    }
     turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
   }
 
   @SuppressWarnings("unused")
-  private void setStateOptimized(SwerveModuleState state) {
+  private void setStateOptimized(SwerveModuleState state, boolean testing) {
     double angleRadians = state.angle.getRadians();
     double speedMs = state.speedMetersPerSecond;
 
@@ -118,7 +120,9 @@ public class SwerveModule {
       speedMs = -state.speedMetersPerSecond;
     }
 
-    driveController.setReference(speedMs, ControlType.kVelocity);
+    if (!testing) {
+      driveController.setReference(speedMs, ControlType.kVelocity);
+    }
     turnController.setReference(angleRadians, ControlType.kPosition);
   }
 

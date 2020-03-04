@@ -44,6 +44,7 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    // Toggle whether or not we're testing the angles using the joystick trigger.
     JoystickButton testingButton = new JoystickButton(controller, 1);
     testingButton.whenReleased(new TestingCommand(drive));
   }

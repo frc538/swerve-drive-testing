@@ -43,7 +43,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       rearLeftLocation, rearRightLocation);
 
   private boolean testing = false;
-  private boolean stopAll = false;
 
   /**
    * Creates a new SwerveDriveSubsystem.
@@ -76,25 +75,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     rearLeftModule.putData();
     rearRightModule.putData();
 
-    if (!testing) {
-      frontLeftModule.setState(states[0]);
-      frontRightModule.setState(states[1]);
-      rearLeftModule.setState(states[2]);
-      rearRightModule.setState(states[3]);
-    } else if (stopAll) {
-      frontLeftModule.setState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-      frontRightModule.setState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-      rearLeftModule.setState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-      rearRightModule.setState(new SwerveModuleState(0, Rotation2d.fromDegrees(0)));
-      stopAll = false;
-    }
+      frontLeftModule.setState(states[0], testing);
+      frontRightModule.setState(states[1], testing);
+      rearLeftModule.setState(states[2], testing);
+      rearRightModule.setState(states[3], testing);
   }
 
   public void toggleTesting() {
     testing = !testing;
-    if (testing) {
-      stopAll = true;
-    }
   }
 
   @Override

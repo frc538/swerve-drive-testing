@@ -39,11 +39,14 @@ public class DriveCommand extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    // Might need to add some condition checking here to stop the command.
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    // Might need to add some condition checking here to stop the command.
+    // But default commands should always return false??
     return false;
   }
 }
