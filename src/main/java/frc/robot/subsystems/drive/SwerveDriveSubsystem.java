@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -67,18 +68,19 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   public void drive(double forwardRate, double rightRate, double rotationRate) {
-    SwerveModuleState[] states = kinematics
-        .toSwerveModuleStates(new ChassisSpeeds(linearSpeed(forwardRate), linearSpeed(rightRate), angularSpeed(rotationRate)));
+    SwerveModuleState[] states = kinematics.toSwerveModuleStates(
+        new ChassisSpeeds(linearSpeed(forwardRate), linearSpeed(rightRate), angularSpeed(rotationRate)));
     SwerveDriveKinematics.normalizeWheelSpeeds(states, MAX_LINEAR_SPEED);
-    frontLeftModule.putData();
-    frontRightModule.putData();
-    rearLeftModule.putData();
-    rearRightModule.putData();
+    // frontLeftModule.putData();
+    // frontRightModule.putData();
+    // rearLeftModule.putData();
+    rearRightModule.putData("rear right");
+    SmartDashboard.putNumber("Joystick output", states[3].angle.getDegrees());
 
-      frontLeftModule.setState(states[0], testing);
-      frontRightModule.setState(states[1], testing);
-      rearLeftModule.setState(states[2], testing);
-      rearRightModule.setState(states[3], testing);
+    // frontLeftModule.setState(states[0], testing);
+    // frontRightModule.setState(states[1], testing);
+    // rearLeftModule.setState(states[2], testing);
+    // rearRightModule.setState(states[3], testing);
   }
 
   public void toggleTesting() {

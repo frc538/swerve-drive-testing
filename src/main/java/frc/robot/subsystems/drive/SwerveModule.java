@@ -51,10 +51,7 @@ public class SwerveModule {
   private final AnalogEncoder absEncoder;
   private final Rotation2d mAngleOffset;
 
-  private final int TURN_ID;
-
   public SwerveModule(int driveId, int turnId, int absEncId, Rotation2d angleOffset) {
-    TURN_ID = turnId;
     mAngleOffset = angleOffset;
 
     drive = new CANSparkMax(driveId, MotorType.kBrushless);
@@ -126,8 +123,13 @@ public class SwerveModule {
     turnController.setReference(angleRadians, ControlType.kPosition);
   }
 
-  public void putData() {
-    SmartDashboard.putNumber("Absolute Encoder " + TURN_ID + ":", getScaledAbsoluteEncoderReading() * 180 / Math.PI);
-    SmartDashboard.putNumber("Turn Encoder" + TURN_ID + ":", turnEncoder.getPosition() * 180 / Math.PI);
+  public void putData(String name) {
+    double turnDeg = turnEncoder.getPosition() * 180 / Math.PI;
+    double absDeg = absEncoder.getDistance() * 180 / Math.PI;
+
+    SmartDashboard.putNumber("Turn Encoder (Total)" + name + ":", turnDeg);
+    SmartDashboard.putNumber("Turn Encoder (Scaled)" + name + ":", turnDeg % 360);
+    SmartDashboard.putNumber("Absolute Encoder (Total)" + name + ":", absDeg);
+    SmartDashboard.putNumber("Absolute Encoder (Scaled)" + name + ":", absDeg % 360);
   }
 }

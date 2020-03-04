@@ -33,7 +33,7 @@ public class DriveCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    mDrive.drive(-mController.getY(), mController.getX(), mController.getZ());
+    mDrive.drive(-mController.getY(), mController.getX(), 0/*mController.getZ()*/);
   }
 
   // Called once the command ends or is interrupted.
