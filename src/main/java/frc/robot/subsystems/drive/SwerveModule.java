@@ -71,6 +71,8 @@ public class SwerveModule {
     driveController = new CANPIDController(drive);
     turnController = new CANPIDController(turn);
 
+    turnController.setOutputRange(-0.5, 0.5);
+
     driveController.setP(0.0001);
     driveController.setFF(0.000171);
 
@@ -90,8 +92,27 @@ public class SwerveModule {
   }
 
   public void setState(SwerveModuleState state) {
+    setStateDefault(state);
+  }
+
+  private void setStateDefault(SwerveModuleState state) {
     driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
     turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
+  }
+
+  private void setStateOptimized(SwerveModuleState state) {
+    double angleRadians = state.angle.getRadians();
+    double speedMs = state.speedMetersPerSecond;
+
+    SwerveModuleState current = getState();
+    Rotation2d deltaAngle = Rotation2d.fromDegrees(state.angle.getDegrees() - current.angle.getDegrees());
+    if (Math.abs(deltaAngle.getDegrees()) > 90 && Math.abs(deltaAngle.getDegrees()) < 270) {
+      angleRadians = state.angle.plus(Rotation2d.fromDegrees(180)).getRadians();
+      speedMs = -state.speedMetersPerSecond;
+    }
+
+    driveController.setReference(speedMs, ControlType.kVelocity);
+    turnController.setReference(angleRadians, ControlType.kPosition);
   }
 
   public void putData() {

@@ -17,6 +17,7 @@ import frc.robot.Constants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
   private final double INCHES_TO_METERS = 2.54 / 100;
+  private final double MAX_LINEAR_SPEED = 3.62712;
 
   private final double shooterY = -9.248 * INCHES_TO_METERS;
 
@@ -55,10 +56,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     rearRightModule.initializeTurnEncoder();
   }
 
-  public void drive(double forwardSpeed, double rightSpeed, double rotationSpeed) {
+  private double linearSpeed(double unitRate) {
+    return unitRate * MAX_LINEAR_SPEED;
+  }
+
+  private double angularSpeed(double unitRate) {
+    return unitRate * Math.PI;
+  }
+
+  public void drive(double forwardRate, double rightRate, double rotationRate) {
     SwerveModuleState[] states = kinematics
-        .toSwerveModuleStates(new ChassisSpeeds(forwardSpeed * 3.62712, rightSpeed * 3.62712, rotationSpeed));
-    SwerveDriveKinematics.normalizeWheelSpeeds(states, 3.62712);
+        .toSwerveModuleStates(new ChassisSpeeds(linearSpeed(forwardRate), linearSpeed(rightRate), angularSpeed(rotationRate)));
+    SwerveDriveKinematics.normalizeWheelSpeeds(states, MAX_LINEAR_SPEED);
     frontLeftModule.putData();
     frontRightModule.putData();
     rearLeftModule.putData();
