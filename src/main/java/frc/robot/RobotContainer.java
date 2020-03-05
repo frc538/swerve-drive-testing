@@ -59,4 +59,8 @@ public class RobotContainer {
     // An ExampleCommand will run in autonomous
     return null;
   }
+
+  public void init() {
+    drive.init();
+  }
 }

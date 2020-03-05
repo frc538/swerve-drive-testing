@@ -20,25 +20,25 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private final double INCHES_TO_METERS = 2.54 / 100;
   private final double MAX_LINEAR_SPEED = 3.62712;
 
-  private final double shooterY = -9.248 * INCHES_TO_METERS;
+  private final double shooterX = -9.248 * INCHES_TO_METERS;
 
-  private final Translation2d frontLeftLocation = new Translation2d(-4.405 * INCHES_TO_METERS - shooterY,
+  private final Translation2d frontLeftLocation = new Translation2d(-4.405 * INCHES_TO_METERS - shooterX,
       -10 * INCHES_TO_METERS);
-  private final Translation2d frontRightLocation = new Translation2d(-4.405 * INCHES_TO_METERS - shooterY,
+  private final Translation2d frontRightLocation = new Translation2d(-4.405 * INCHES_TO_METERS - shooterX,
       10 * INCHES_TO_METERS);
-  private final Translation2d rearLeftLocation = new Translation2d(-27.905 * INCHES_TO_METERS - shooterY,
+  private final Translation2d rearLeftLocation = new Translation2d(-27.905 * INCHES_TO_METERS - shooterX,
       -10 * INCHES_TO_METERS);
-  private final Translation2d rearRightLocation = new Translation2d(-27.905 * INCHES_TO_METERS - shooterY,
+  private final Translation2d rearRightLocation = new Translation2d(-27.905 * INCHES_TO_METERS - shooterX,
       10 * INCHES_TO_METERS);
 
   private final SwerveModule frontLeftModule = new SwerveModule(Constants.CAN_ID.FRONT_LEFT_DRIVE,
-      Constants.CAN_ID.FRONT_LEFT_TURN, Constants.FRONT_LEFT_ABS_ENCODER_ID, Rotation2d.fromDegrees(201.796854));
+      Constants.CAN_ID.FRONT_LEFT_TURN, Constants.FRONT_LEFT_ABS_ENCODER_ID, new Rotation2d(1.464952));
   private final SwerveModule frontRightModule = new SwerveModule(Constants.CAN_ID.FRONT_RIGHT_DRIVE,
-      Constants.CAN_ID.FRONT_RIGHT_TURN, Constants.FRONT_RIGHT_ABS_ENCODER_ID, Rotation2d.fromDegrees(277.031222));
+      Constants.CAN_ID.FRONT_RIGHT_TURN, Constants.FRONT_RIGHT_ABS_ENCODER_ID, new Rotation2d(7.976699));
   private final SwerveModule rearLeftModule = new SwerveModule(Constants.CAN_ID.REAR_LEFT_DRIVE,
-      Constants.CAN_ID.REAR_LEFT_TURN, Constants.REAR_LEFT_ABS_ENCODER_ID, Rotation2d.fromDegrees(211.816385));
+      Constants.CAN_ID.REAR_LEFT_TURN, Constants.REAR_LEFT_ABS_ENCODER_ID, new Rotation2d(3.198350));
   private final SwerveModule rearRightModule = new SwerveModule(Constants.CAN_ID.REAR_RIGHT_DRIVE,
-      Constants.CAN_ID.REAR_RIGHT_TURN, Constants.REAR_RIGHT_ABS_ENCODER_ID, Rotation2d.fromDegrees(117.597644));
+      Constants.CAN_ID.REAR_RIGHT_TURN, Constants.REAR_RIGHT_ABS_ENCODER_ID, new Rotation2d(4.532913));
 
   private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(frontLeftLocation, frontRightLocation,
       rearLeftLocation, rearRightLocation);
@@ -60,31 +60,38 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   private double linearSpeed(double unitRate) {
-    return unitRate * MAX_LINEAR_SPEED;
+    return Math.pow(unitRate, 3.0) * MAX_LINEAR_SPEED;
   }
 
   private double angularSpeed(double unitRate) {
-    return unitRate * Math.PI;
+    return Math.pow(unitRate, 3.0) * Math.PI;
   }
 
   public void drive(double forwardRate, double rightRate, double rotationRate) {
+    SmartDashboard.putNumber("Forward", forwardRate);
+    SmartDashboard.putNumber("Right", rightRate);
+    SmartDashboard.putNumber("Rotation", rotationRate);
+
+
     SwerveModuleState[] states = kinematics.toSwerveModuleStates(
         new ChassisSpeeds(linearSpeed(forwardRate), linearSpeed(rightRate), angularSpeed(rotationRate)));
     SwerveDriveKinematics.normalizeWheelSpeeds(states, MAX_LINEAR_SPEED);
-    // frontLeftModule.putData();
-    // frontRightModule.putData();
-    // rearLeftModule.putData();
-    rearRightModule.putData("rear right");
-    SmartDashboard.putNumber("Joystick output", states[3].angle.getDegrees());
 
-    // frontLeftModule.setState(states[0], testing);
-    // frontRightModule.setState(states[1], testing);
-    // rearLeftModule.setState(states[2], testing);
-    // rearRightModule.setState(states[3], testing);
+    frontLeftModule.setState(states[0]);
+    frontRightModule.setState(states[1]);
+    rearLeftModule.setState(states[2]);
+    rearRightModule.setState(states[3]);
   }
 
   public void toggleTesting() {
     testing = !testing;
+  }
+
+  public void init() {
+    frontLeftModule.initializeTurnEncoder();
+    frontRightModule.initializeTurnEncoder();
+    rearLeftModule.initializeTurnEncoder();
+    rearRightModule.initializeTurnEncoder();
   }
 
   @Override

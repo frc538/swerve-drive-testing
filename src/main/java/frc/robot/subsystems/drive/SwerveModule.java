@@ -60,6 +60,8 @@ public class SwerveModule {
     drive.restoreFactoryDefaults();
     turn.restoreFactoryDefaults();
 
+    drive.setInverted(true);
+
     driveEncoder = drive.getEncoder();
     turnEncoder = turn.getEncoder();
 
@@ -82,33 +84,25 @@ public class SwerveModule {
     turnController.setP(0.08);
   }
 
-  private double getScaledAbsoluteEncoderReading() {
-    return absEncoder == null ? 0 : absEncoder.getDistance() % RADIANS_PER_ROTATION;
-  }
-
   public void initializeTurnEncoder() {
-    turnEncoder.setPosition(getScaledAbsoluteEncoderReading() - mAngleOffset.getRadians());
+    turnEncoder.setPosition((absEncoder.getDistance() - mAngleOffset.getRadians()) % RADIANS_PER_ROTATION);
   }
 
   public SwerveModuleState getState() {
     return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(turnEncoder.getPosition()));
   }
 
-  public void setState(SwerveModuleState state, boolean testing) {
-    setStateDefault(state, testing);
+  public void setState(SwerveModuleState state) {
+    setStateOptimized(state);
   }
 
-  private void setStateDefault(SwerveModuleState state, boolean testing) {
-    if (!testing) {
-      driveController.setReference(state.speedMetersPerSecond, ControlType.kVelocity);
-    }
-    turnController.setReference(state.angle.getRadians(), ControlType.kPosition);
-  }
-
-  @SuppressWarnings("unused")
-  private void setStateOptimized(SwerveModuleState state, boolean testing) {
+  private void setStateOptimized(SwerveModuleState state) {
     double angleRadians = state.angle.getRadians();
     double speedMs = state.speedMetersPerSecond;
+
+    if (angleRadians < 0) {
+      angleRadians += 2*Math.PI;
+    }
 
     SwerveModuleState current = getState();
     Rotation2d deltaAngle = Rotation2d.fromDegrees(state.angle.getDegrees() - current.angle.getDegrees());
@@ -117,19 +111,12 @@ public class SwerveModule {
       speedMs = -state.speedMetersPerSecond;
     }
 
-    if (!testing) {
-      driveController.setReference(speedMs, ControlType.kVelocity);
-    }
+    driveController.setReference(speedMs / DRIVE_VELOCITY_CONVERSION_FACTOR, ControlType.kVelocity);
     turnController.setReference(angleRadians, ControlType.kPosition);
   }
 
-  public void putData(String name) {
-    double turnDeg = turnEncoder.getPosition() * 180 / Math.PI;
-    double absDeg = absEncoder.getDistance() * 180 / Math.PI;
-
-    SmartDashboard.putNumber("Turn Encoder (Total)" + name + ":", turnDeg);
-    SmartDashboard.putNumber("Turn Encoder (Scaled)" + name + ":", turnDeg % 360);
-    SmartDashboard.putNumber("Absolute Encoder (Total)" + name + ":", absDeg);
-    SmartDashboard.putNumber("Absolute Encoder (Scaled)" + name + ":", absDeg % 360);
+  public void putData(String module) {
+    SmartDashboard.putNumber(module, turnEncoder.getPosition());
   }
+
 }
